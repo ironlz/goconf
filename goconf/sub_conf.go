@@ -87,6 +87,77 @@ func (c *SubConf) GetIntPropertyWithDefault(propertyName string, def int) int {
 	return property
 }
 
+func (c *SubConf) GetArrayProperty(propertyName string) ([]interface{}, error) {
+	property, err := c.GetProperty(propertyName)
+	if err != nil {
+		return nil, err
+	}
+	kind := reflect.TypeOf(property).Kind()
+	if kind == reflect.Slice || kind == reflect.Array {
+		return property.([]interface{}), err
+	} else {
+		return nil, fmt.Errorf("%s not a slice or array", propertyName)
+	}
+}
+
+func (c *SubConf) GetArrayPropertyWithDefault(propertyName string, def []interface{}) []interface{} {
+	property, err := c.GetArrayProperty(propertyName)
+	if err != nil {
+		return def
+	}
+	return property
+}
+
+func (c *SubConf) GetStringArrayProperty(propertyName string) ([]string, error) {
+	property, err := c.GetArrayProperty(propertyName)
+	if err != nil {
+		return nil, err
+	}
+	size := len(property)
+	result := make([]string, 0)
+	for i := 0; i < size; i++ {
+		stringProperty, err := c.GetStringProperty(propertyName + "." + strconv.Itoa(i))
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, stringProperty)
+	}
+	return result, nil
+}
+
+func (c *SubConf) GetStringArrayPropertyWithDefault(propertyName string, def []string) []string {
+	property, err := c.GetStringArrayProperty(propertyName)
+	if err != nil {
+		return def
+	}
+	return property
+}
+
+func (c *SubConf) GetIntArrayProperty(propertyName string) ([]int, error) {
+	property, err := c.GetArrayProperty(propertyName)
+	if err != nil {
+		return nil, err
+	}
+	size := len(property)
+	result := make([]int, 0)
+	for i := 0; i < size; i++ {
+		intProperty, err := c.GetIntProperty(propertyName + "." + strconv.Itoa(i))
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, intProperty)
+	}
+	return result, err
+}
+
+func (c *SubConf) GetIntArrayPropertyWithDefault(propertyName string, def []int) []int {
+	property, err := c.GetIntArrayProperty(propertyName)
+	if err != nil {
+		return def
+	}
+	return property
+}
+
 func ConstructSubConf(subConfPath string) (SubConf, string, error) {
 	startIndex := 0
 	for i, ch := range subConfPath {
@@ -118,26 +189,44 @@ func parseYamlFile(path, fileName string) (SubConf, string, error) {
 
 func extractSubConf(tmp map[string]interface{}) SubConf {
 	result := SubConf{}
-	for key, value := range tmp {
-		switch reflect.TypeOf(value).Kind() {
-		case reflect.Map:
-			parseMap(key, value.(map[string]interface{}), result)
-			break
-		default:
-			result[key] = value
+	for currentKey, v := range tmp {
+		kind := reflect.TypeOf(v).Kind()
+		if kind == reflect.Map {
+			parseMap(currentKey, v.(map[string]interface{}), result)
+		} else if kind == reflect.Slice || kind == reflect.Array {
+			parseSlice(currentKey, v.([]interface{}), result)
+		} else {
+			result[currentKey] = v
 		}
 	}
 	return result
 }
 
+func parseSlice(prefix string, array []interface{}, result SubConf) {
+	result[prefix] = array
+	for index, v := range array {
+		currentKey := prefix + "." + strconv.Itoa(index)
+		kind := reflect.TypeOf(v).Kind()
+		if kind == reflect.Map {
+			parseMap(currentKey, v.(map[string]interface{}), result)
+		} else if kind == reflect.Slice || kind == reflect.Array {
+			parseSlice(currentKey, v.([]interface{}), result)
+		} else {
+			result[currentKey] = v
+		}
+	}
+}
+
 func parseMap(prefix string, m map[string]interface{}, result SubConf) {
+	result[prefix] = m
 	for k, v := range m {
 		currentKey := prefix + "." + k
-		switch reflect.TypeOf(v).Kind() {
-		case reflect.Map:
-			parseMap(prefix+"."+k, v.(map[string]interface{}), result)
-			break
-		default:
+		kind := reflect.TypeOf(v).Kind()
+		if kind == reflect.Map {
+			parseMap(currentKey, v.(map[string]interface{}), result)
+		} else if kind == reflect.Slice || kind == reflect.Array {
+			parseSlice(currentKey, v.([]interface{}), result)
+		} else {
 			result[currentKey] = v
 		}
 	}
