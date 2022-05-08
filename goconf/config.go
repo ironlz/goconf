@@ -1,6 +1,8 @@
-package conf
+package goconf
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/fs"
 	"path/filepath"
 )
@@ -20,6 +22,15 @@ func (c *Config) Use(conf string) *SubConf {
 	} else {
 		return &SubConf{}
 	}
+}
+
+func (c *Config) String() string {
+	contentBytes, err := json.Marshal(c.content)
+	contentStr := ""
+	if err == nil {
+		contentStr = string(contentBytes)
+	}
+	return fmt.Sprintf("{Content:%s, Path: %s}", contentStr, c.confPath)
 }
 
 func ConstructConfig(path string) (*Config, error) {

@@ -1,4 +1,4 @@
-package conf
+package goconf
 
 import (
 	"fmt"
@@ -11,6 +11,5 @@ func TestConstructConfig(t *testing.T) {
 		t.Fatalf("Failed parse config, %v", err)
 	}
 
-	property := config.Use("config").GetProperty("app.listen")
-	fmt.Println(property)
+	fmt.Println(config)
 }

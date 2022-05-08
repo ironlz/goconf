@@ -1,4 +1,4 @@
-module policy-bind-sync
+module goconf
 
 go 1.17
 

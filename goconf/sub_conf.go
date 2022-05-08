@@ -1,4 +1,4 @@
-package conf
+package goconf
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"reflect"
+	"strconv"
 )
 
 // SubConf 子配置，代表一个配置文件
@@ -19,6 +20,14 @@ func (c *SubConf) GetProperty(propertyName string) (interface{}, error) {
 	return v, fmt.Errorf("property %s not exist", propertyName)
 }
 
+func (c *SubConf) GetPropertyWithDefault(propertyName string, def interface{}) interface{} {
+	property, err := c.GetProperty(propertyName)
+	if err != nil {
+		return def
+	}
+	return property
+}
+
 func (c *SubConf) GetStringProperty(propertyName string) (string, error) {
 	v, err := c.GetProperty(propertyName)
 	if err != nil {
@@ -28,11 +37,11 @@ func (c *SubConf) GetStringProperty(propertyName string) (string, error) {
 }
 
 func (c *SubConf) GetStringPropertyWithDefault(propertyName, defaultVaule string) string {
-	v, err := c.GetProperty(propertyName)
+	v, err := c.GetStringProperty(propertyName)
 	if err != nil {
 		return defaultVaule
 	}
-	return fmt.Sprintf("%s", v)
+	return v
 }
 
 func (c *SubConf) GetIntProperty(propertyName string) (int, error) {
@@ -56,16 +65,26 @@ func (c *SubConf) GetIntProperty(propertyName string) (int, error) {
 	case reflect.Float64:
 		return int(v.(float64)), nil
 	case reflect.Uint:
-
+		return int(v.(uint)), nil
+	case reflect.Uint8:
+		return int(v.(uint8)), nil
+	case reflect.Uint16:
+		return int(v.(uint16)), nil
+	case reflect.Uint32:
+		return int(v.(uint32)), nil
+	case reflect.Uint64:
+		return int(v.(uint64)), nil
+	default:
+		return strconv.Atoi(fmt.Sprintf("%s", v))
 	}
 }
 
-func (c *SubConf) GetIntPropertyWithDefault(propertyName string, defaultVaule int) int {
-	v, err := c.GetProperty(propertyName)
+func (c *SubConf) GetIntPropertyWithDefault(propertyName string, def int) int {
+	property, err := c.GetIntProperty(propertyName)
 	if err != nil {
-		return defaultVaule
+		return def
 	}
-	return fmt.Sprintf("%s", v)
+	return property
 }
 
 func ConstructSubConf(subConfPath string) (SubConf, string, error) {
