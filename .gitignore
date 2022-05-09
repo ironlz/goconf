@@ -1,4 +1,1 @@
-/configs/config.yaml
-/configs/db.yaml
-/configs/log.yaml
-/configs/redis.yaml
+/configs/*.yaml
