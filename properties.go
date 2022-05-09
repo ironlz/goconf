@@ -51,7 +51,7 @@ func (c Properties) GetStringProperty(propertyName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s", v), err
+	return fmt.Sprintf("%v", v), err
 }
 
 func (c Properties) GetStringPropertyWithDefault(propertyName, defaultVaule string) string {
@@ -97,7 +97,7 @@ func (c Properties) GetIntProperty(propertyName string) (int, error) {
 	case reflect.Uint64:
 		return int(v.(uint64)), nil
 	default:
-		return strconv.Atoi(fmt.Sprintf("%s", v))
+		return strconv.Atoi(fmt.Sprintf("%v", v))
 	}
 }
 
