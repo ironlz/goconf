@@ -1,4 +1,4 @@
-module goconf
+module github.com/ironlz/goconf
 
 go 1.17
 
