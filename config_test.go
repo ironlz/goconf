@@ -5,7 +5,7 @@ import (
 )
 
 func TestFromFile(t *testing.T) {
-	properties, err := PropertiesFromFile("../configs/config.yaml")
+	properties, err := PropertiesFromFile("./configs/config.yaml")
 	if err != nil {
 		t.Fatalf("failed convert file to properties. %v", err)
 	}
@@ -22,7 +22,7 @@ func TestFromFile(t *testing.T) {
 }
 
 func TestPropertiesFromDir(t *testing.T) {
-	propertiesFromDir, err := PropertiesFromDir("../configs", true)
+	propertiesFromDir, err := PropertiesFromDir("./configs", true)
 	if err != nil {
 		t.Fatalf("failed convert file to properties. %v", err)
 	}
